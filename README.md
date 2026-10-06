@@ -66,7 +66,7 @@ The optional stage-3 bonus features (auto-match suggestions, CSV export, index p
 ## Tech stack
 React 18 + TypeScript (strict) + Vite · Tailwind CSS with shadcn-style components (Radix primitives) · lucide-react icons ·
 zustand · @dnd-kit/core · react-dropzone · sonner · pdf-lib (package building) · pdfjs-dist (reading, page counts,
-previews) · Inter + Noto Sans Bengali · vitest · GitHub Actions → GitHub Pages.
+previews) · Source Serif 4, IBM Plex Sans/Mono, Hind Siliguri, Noto Serif Bengali · vitest · GitHub Actions → GitHub Pages.
 
 ## Run locally
 ```bash

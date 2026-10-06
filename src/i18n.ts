@@ -53,6 +53,7 @@ const en = {
   'tender.passed': 'Deadline passed',
   'tender.replace': 'Load a different file',
   'tender.not_given': 'Not given',
+  'tender.file_no': 'File no.',
 
   'req.heading': 'Required documents',
   'req.count': '{n} documents, in submission order',
@@ -100,13 +101,15 @@ const en = {
   'bar.no_problems': 'No problems found',
   'bar.generate': 'Generate package',
   'bar.ready_to_go': 'Ready to generate',
+  'bar.ready_label': 'ready',
+  'bar.stamp_ready': 'Ready for submission',
 
   'step.match_hint': 'Drag each file onto its document on the left, or pick it from the dropdown in that row.',
   'step.need_fix': 'Fix the items under “Why can’t I generate?” in the bar below, then generate.',
   'step.gen_ready': 'Everything required is in place. Press “Generate package” below.',
 
-  'slot.drop': 'Drop a file here',
-  'slot.drop_now': 'Release to match',
+  'slot.drop': 'Drop file here',
+  'slot.drop_now': 'Release to place it here',
   'slot.choose': 'Choose a file…',
   'slot.choose_label': 'Choose a file for {doc}',
   'slot.used_for': 'used for {doc}',
@@ -238,6 +241,7 @@ const bn: Record<Key, string> = {
   'tender.passed': 'শেষ তারিখ পেরিয়ে গেছে',
   'tender.replace': 'অন্য ফাইল লোড করুন',
   'tender.not_given': 'উল্লেখ নেই',
+  'tender.file_no': 'ফাইল নং',
 
   'req.heading': 'প্রয়োজনীয় কাগজপত্র',
   'req.count': 'মোট {n}টি কাগজ, জমার ক্রম অনুযায়ী',
@@ -285,13 +289,15 @@ const bn: Record<Key, string> = {
   'bar.no_problems': 'কোনো সমস্যা নেই',
   'bar.generate': 'প্যাকেজ তৈরি করুন',
   'bar.ready_to_go': 'প্যাকেজ তৈরির জন্য প্রস্তুত',
+  'bar.ready_label': 'প্রস্তুত',
+  'bar.stamp_ready': 'জমা দেওয়ার জন্য প্রস্তুত',
 
   'step.match_hint': 'প্রতিটি ফাইল টেনে বাঁ পাশের সঠিক কাগজের ঘরে ছাড়ুন, অথবা ওই সারির ড্রপডাউন থেকে বেছে নিন।',
   'step.need_fix': 'নিচের বারে “কেন প্যাকেজ তৈরি করা যাচ্ছে না?” তালিকার বিষয়গুলো ঠিক করুন, তারপর প্যাকেজ তৈরি করুন।',
   'step.gen_ready': 'দরকারি সব কাগজ ঠিক আছে। নিচে “প্যাকেজ তৈরি করুন” চাপুন।',
 
-  'slot.drop': 'ফাইল এখানে ছাড়ুন',
-  'slot.drop_now': 'ছেড়ে দিন, মিলে যাবে',
+  'slot.drop': 'ফাইল এখানে রাখুন',
+  'slot.drop_now': 'ছেড়ে দিন, এখানে বসবে',
   'slot.choose': 'ফাইল বেছে নিন…',
   'slot.choose_label': '{doc}-এর জন্য ফাইল বেছে নিন',
   'slot.used_for': '{doc}-এ ব্যবহৃত',

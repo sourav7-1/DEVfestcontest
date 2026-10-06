@@ -29,7 +29,7 @@ function StepGuidance() {
   if (!msg) return null;
   return (
     <Alert tone="info" className="mb-6">
-      <Info className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+      <Info className="mt-0.5 shrink-0" aria-hidden />
       <p>{msg}</p>
     </Alert>
   );
@@ -54,8 +54,8 @@ function Workspace() {
       </div>
       <DragOverlay dropAnimation={null}>
         {dragFile && (
-          <div className="flex max-w-xs items-center gap-2 rounded-lg border border-primary bg-white px-3 py-2 shadow-lg">
-            <FileText className="h-5 w-5 shrink-0 text-red-600" aria-hidden />
+          <div className="sheet-fold flex max-w-xs -rotate-1 items-center gap-2 rounded-sm border border-primary bg-sheet py-2 pl-3 pr-5 shadow-lift">
+            <FileText className="h-[18px] w-[18px] shrink-0 text-tape" aria-hidden />
             <span className="truncate font-medium text-ink">{dragFile.name}</span>
           </div>
         )}
@@ -74,10 +74,10 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen flex-col bg-canvas text-ink">
+      <div className="flex min-h-screen flex-col bg-paper text-ink">
         <TopBar />
         <Stepper />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-6">
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-6 pb-10 pt-6">
           <StepGuidance />
           {!tender ? (
             <RequirementsHero />
@@ -92,7 +92,22 @@ export default function App() {
       </div>
       <PreviewSheet />
       <ReplaceDialog />
-      <Toaster position="top-right" offset={80} richColors closeButton toastOptions={{ className: 'text-base' }} />
+      <Toaster
+        position="top-right"
+        offset={72}
+        closeButton
+        toastOptions={{
+          classNames: {
+            toast: '!rounded-md !border !border-rule !border-l-4 !bg-sheet !font-sans !text-base !text-ink !shadow-lift',
+            success: '!border-l-st-ok [&_[data-icon]]:!text-st-ok',
+            error: '!border-l-tape [&_[data-icon]]:!text-tape',
+            warning: '!border-l-st-need [&_[data-icon]]:!text-st-need',
+            info: '!border-l-khaki',
+            default: '!border-l-khaki',
+            closeButton: '!border-rule !bg-sheet !text-ink-muted',
+          },
+        }}
+      />
     </TooltipProvider>
   );
 }

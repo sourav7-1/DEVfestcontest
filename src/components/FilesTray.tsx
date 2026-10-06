@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
-import { ArrowRight, Eye, FileText, FileWarning, GripVertical, Loader2, Trash2, Upload, X } from 'lucide-react';
+import { ChevronDown, Eye, FileText, FileWarning, FolderOpen, GripVertical, Inbox, Loader2, Trash2, Upload, X } from 'lucide-react';
 import { applyLimits, formatSize, newId, readUpload } from '@/lib/files';
 import { duplicateOf } from '@/lib/duplicates';
 import { countPages } from '@/lib/pdf';
@@ -10,7 +10,7 @@ import { Status, type UploadedFile } from '@/lib/types';
 import { localizeDigits, translate } from '@/i18n';
 import { reqCode, reqTitle, tr, useStore, useT } from '@/store';
 import { StatusBadge } from './status';
-import { Button, Card, Tooltip, cn } from './ui';
+import { Button, Card, Empty, Tooltip, cn } from './ui';
 
 async function ingest(dropped: File[]) {
   const { files, addFiles, setReading } = useStore.getState();
@@ -48,6 +48,8 @@ export function FilesTray() {
   const { files, lang, readingCount, removeFile, matches } = useStore();
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({ noClick: true, onDrop: (f) => void ingest(f) });
   const [filter, setFilter] = useState<Filter>('all');
+  // Tablet/phone: the tray is a drawer under the register (always open on desktop).
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const dupes = useMemo(() => duplicateOf(files), [files]);
   const matchedTo = useMemo(() => Object.fromEntries(Object.entries(matches).map(([r, f]) => [f, r])), [matches]);
   const ok = files.filter((f) => !f.error);
@@ -67,36 +69,50 @@ export function FilesTray() {
   };
 
   return (
-    <Card {...getRootProps()} className={cn('flex flex-col transition-shadow lg:sticky lg:top-20', isDragActive && 'ring-2 ring-primary')}>
+    <Card {...getRootProps()} className={cn('flex flex-col overflow-hidden transition-colors lg:sticky lg:top-20', isDragActive && 'border-primary')}>
       <input {...getInputProps({ accept: '.pdf,application/pdf' })} />
-      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-        <div>
-          <h2 className="text-lg font-semibold text-ink">{t('files.heading')}</h2>
-          <p className="text-sm text-slate-500">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-khaki px-5 py-4">
+        <div className="min-w-0">
+          <h2 className="text-xl font-semibold text-ink">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 text-left lg:pointer-events-none"
+              aria-expanded={drawerOpen}
+              aria-controls="files-drawer"
+              onClick={() => setDrawerOpen((o) => !o)}
+            >
+              <ChevronDown className={cn('h-5 w-5 shrink-0 text-ink-muted transition-transform lg:hidden', !drawerOpen && '-rotate-90')} aria-hidden />
+              {t('files.heading')}
+            </button>
+          </h2>
+          <p className="font-mono text-sm tabular text-ink-muted">
             {t('files.count', { n: ok.length, max: 30, size: localizeDigits(formatSize(totalSize), lang) })}
           </p>
         </div>
-        <Button variant="outline" onClick={open}>
-          <Upload className="h-4 w-4" aria-hidden />
+        <Button variant="outline" onClick={open} className="shrink-0">
+          <Upload aria-hidden />
           {t('files.choose')}
         </Button>
       </div>
+      <div id="files-drawer" className={cn('flex-col', drawerOpen ? 'flex' : 'hidden lg:flex')}>
 
       <button
         type="button"
         onClick={open}
         className={cn(
-          'mx-5 mt-4 flex flex-col items-center gap-1 rounded-xl border-2 border-dashed px-4 py-4 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-          isDragActive ? 'border-primary bg-primary-soft' : 'border-slate-300 bg-slate-50 hover:border-primary/60',
+          'mx-5 mt-4 flex items-center gap-3 rounded-md border-2 border-dashed px-4 py-3 text-left transition-colors',
+          isDragActive ? 'border-primary bg-khaki-soft' : 'border-rule bg-paper/60 hover:border-khaki',
         )}
       >
-        <Upload className="h-6 w-6 text-primary" aria-hidden />
-        <span className="font-medium text-ink">{isDragActive ? t('files.drop_active') : t('files.drop')}</span>
-        <span className="text-sm text-slate-500">{t('files.drop_hint')}</span>
+        <FolderOpen className="h-6 w-6 shrink-0 text-khaki-deep" aria-hidden />
+        <span className="min-w-0">
+          <span className="block font-medium text-ink">{isDragActive ? t('files.drop_active') : t('files.drop')}</span>
+          <span className="block text-sm text-ink-muted">{t('files.drop_hint')}</span>
+        </span>
       </button>
 
       {files.length > 0 && (
-        <div role="group" aria-label={t('filter.label')} className="mx-5 mt-4 flex rounded-lg border border-line bg-slate-50 p-1">
+        <div role="group" aria-label={t('filter.label')} className="mx-5 mt-4 flex border-b border-rule">
           {(['all', 'unmatched', 'problems'] as const).map((k) => (
             <button
               key={k}
@@ -104,12 +120,12 @@ export function FilesTray() {
               aria-pressed={filter === k}
               onClick={() => setFilter(k)}
               className={cn(
-                'flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                filter === k ? 'bg-white text-primary-dark shadow-sm' : 'text-slate-600 hover:text-ink',
+                '-mb-px flex min-h-10 flex-1 items-center justify-center gap-1.5 border-b-2 px-2 text-sm font-medium transition-colors',
+                filter === k ? 'border-primary text-primary' : 'border-transparent text-ink-muted hover:text-ink',
               )}
             >
               {t(`filter.${k}`)}
-              <span className={cn('rounded px-1.5 text-xs tabular-nums', k === 'problems' && counts.problems ? 'bg-red-100 text-red-800' : 'bg-slate-200 text-slate-700')}>
+              <span className={cn('font-mono text-xs tabular', k === 'problems' && counts.problems ? 'font-semibold text-tape' : '')}>
                 {localizeDigits(String(counts[k]), lang)}
               </span>
             </button>
@@ -117,15 +133,15 @@ export function FilesTray() {
         </div>
       )}
 
-      <div className="flex-1 space-y-2 p-5 lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto" aria-live="polite">
+      <div className="flex-1 space-y-2 p-5 lg:max-h-[max(20rem,calc(100vh-26rem))] lg:overflow-y-auto" aria-live="polite">
         {readingCount > 0 && (
-          <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-3 text-slate-600">
+          <div className="flex items-center gap-3 rounded-sm border border-rule bg-paper/60 px-3 py-3 text-ink-muted">
             <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden />
             {t('files.reading', { n: readingCount })}
           </div>
         )}
-        {files.length === 0 && readingCount === 0 && <p className="py-6 text-center text-slate-500">{t('files.empty')}</p>}
-        {files.length > 0 && shownOk.length + shownRejected.length === 0 && <p className="py-4 text-center text-slate-500">{t('filter.empty')}</p>}
+        {files.length === 0 && readingCount === 0 && <Empty icon={Inbox}>{t('files.empty')}</Empty>}
+        {files.length > 0 && shownOk.length + shownRejected.length === 0 && <Empty icon={Inbox} className="py-6">{t('filter.empty')}</Empty>}
 
         <ul className="space-y-2">
           {shownOk.map((f) => (
@@ -136,7 +152,7 @@ export function FilesTray() {
         {shownRejected.length > 0 && (
           <div className="pt-3">
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-600">{t('files.rejected')}</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-tape">{t('files.rejected')}</h3>
               <Button variant="ghost" className="min-h-9 text-sm" onClick={() => rejected.forEach((f) => removeFile(f.id))}>
                 {t('files.clear_rejected')}
               </Button>
@@ -148,6 +164,7 @@ export function FilesTray() {
             </ul>
           </div>
         )}
+      </div>
       </div>
     </Card>
   );
@@ -168,37 +185,39 @@ function FileCard({ file: f, dupeOf, matchedReqId, onRemove }: { file: UploadedF
       tabIndex={-1}
       aria-label={t('tray.drag', { name: f.name })}
       className={cn(
-        'group flex cursor-grab touch-none items-start gap-2 rounded-lg border px-2 py-2.5 transition-[opacity,box-shadow] active:cursor-grabbing',
-        bad ? 'border-red-200 bg-red-50/60' : 'border-line bg-white hover:shadow-sm',
-        req && 'opacity-60',
-        isDragging && 'opacity-30',
+        'sheet-fold group flex cursor-grab touch-none items-start gap-2 rounded-sm border border-rule bg-sheet py-2.5 pl-1.5 pr-4 transition-colors active:cursor-grabbing',
+        bad ? 'border-l-[3px] border-l-tape' : 'hover:border-khaki',
+        req && 'bg-paper/70',
+        isDragging && 'opacity-40',
       )}
     >
-      <GripVertical className="mt-0.5 h-5 w-5 shrink-0 text-slate-300 group-hover:text-slate-500" aria-hidden />
-      {bad ? <FileWarning className="mt-0.5 h-6 w-6 shrink-0 text-red-700" aria-hidden /> : <FileText className="mt-0.5 h-6 w-6 shrink-0 text-red-600" aria-hidden />}
+      <GripVertical className="mt-0.5 h-[18px] w-[18px] shrink-0 text-rule group-hover:text-ink-muted" aria-hidden />
+      {bad ? <FileWarning className="mt-0.5 h-[18px] w-[18px] shrink-0 text-tape" aria-hidden /> : <FileText className={cn('mt-0.5 h-[18px] w-[18px] shrink-0', req ? 'text-ink-muted' : 'text-tape')} aria-hidden />}
       <div className="min-w-0 flex-1">
         <Tooltip content={f.name}>
-          <p className="truncate font-medium text-ink" tabIndex={0}>
+          <p className={cn('truncate font-medium', req ? 'text-ink-muted' : 'text-ink')} tabIndex={0}>
             {f.name}
           </p>
         </Tooltip>
         {!bad && (
-          <p className="text-sm text-slate-500">
+          <p className="font-mono text-sm tabular text-ink-muted">
             {f.pageCount === 1 ? t('files.page') : t('files.pages', { n: f.pageCount })} · {localizeDigits(formatSize(f.size), lang)}
           </p>
         )}
         {req && (
-          <p
-            className="mt-1 inline-flex items-center gap-1 rounded bg-primary-soft px-1.5 py-0.5 text-xs font-medium text-primary-dark"
-            title={t('tray.matched_to', { code: reqCode(req), doc: reqTitle(req, lang) })}
-          >
-            <ArrowRight className="h-3 w-3" aria-hidden />
-            {reqCode(req)} {reqTitle(req, lang)}
+          <p className="mt-1 truncate text-sm text-primary" title={t('tray.matched_to', { code: reqCode(req), doc: reqTitle(req, lang) })}>
+            <span className="font-mono font-semibold">→ {localizeDigits(reqCode(req), lang)}</span> {reqTitle(req, lang)}
           </p>
         )}
         {dupeOf && (
           <div className="mt-1">
-            <StatusBadge status={Status.Duplicate} label={t('files.same_as', { name: dupeOf })} />
+            <StatusBadge
+              status={Status.Duplicate}
+              className="max-w-full whitespace-normal"
+              label={t('files.same_as', { name: '\u0000' })
+                .split('\u0000')
+                .flatMap((part, i) => (i ? [<span key={i} className="break-all normal-case tracking-normal">{dupeOf}</span>, part] : [part]))}
+            />
           </div>
         )}
         {bad && (
@@ -206,17 +225,17 @@ function FileCard({ file: f, dupeOf, matchedReqId, onRemove }: { file: UploadedF
             <div className="mt-1">
               <StatusBadge status={Status.Error} label={t(`ferr.short.${f.error!}`)} />
             </div>
-            <p className="mt-1 text-sm text-red-900">{t(`ferr.${f.error!}`)}</p>
+            <p className="mt-1 text-sm text-ink">{t(`ferr.${f.error!}`)}</p>
           </>
         )}
       </div>
       {!bad && (
         <Button variant="ghost" size="icon" aria-label={`${t('slot.preview')}: ${f.name}`} onClick={() => setPreview(f.id)}>
-          <Eye className="h-4 w-4" aria-hidden />
+          <Eye aria-hidden />
         </Button>
       )}
-      <Button variant="ghost" size="icon" aria-label={t(bad ? 'files.dismiss' : 'files.remove', { name: f.name })} onClick={onRemove}>
-        {bad ? <X className="h-4 w-4" aria-hidden /> : <Trash2 className="h-4 w-4" aria-hidden />}
+      <Button variant="ghost" size="icon" className="hover:text-tape" aria-label={t(bad ? 'files.dismiss' : 'files.remove', { name: f.name })} onClick={onRemove}>
+        {bad ? <X aria-hidden /> : <Trash2 aria-hidden />}
       </Button>
     </li>
   );

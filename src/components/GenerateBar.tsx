@@ -7,10 +7,11 @@ import { todayISO } from '@/lib/requirements';
 import { Status } from '@/lib/types';
 import type { Blocker } from '@/lib/status';
 import { focusRow } from '@/actions';
-import { reqTitle, tr, useEvaluation, useStore, useT } from '@/store';
+import { reqCode, reqTitle, tr, useEvaluation, useStore, useT } from '@/store';
+import { localizeDigits } from '@/i18n';
 import { STATUS_META } from './status';
 import { GenerateDialogs, type GenState } from './Dialogs';
-import { Button, cn } from './ui';
+import { Button, cn, dialogClass } from './ui';
 
 const BLOCKER_STATUS: Record<Blocker['kind'], Status> = {
   missing: Status.Missing,
@@ -88,62 +89,78 @@ export function GenerateBar() {
   };
 
   const Warn = STATUS_META[Status.Error].icon;
-  const Ok = STATUS_META[Status.OK].icon;
+  const total = requirements.length;
+  const allOk = ev.canGenerate; // nothing blocks submission (optional docs may be "not provided")
   return (
-    <div className="sticky bottom-0 z-20 border-t border-line bg-white/95 shadow-[0_-4px_12px_rgba(15,40,60,0.05)] backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
+    <div className="sticky bottom-0 z-20 border-t-2 border-khaki bg-sheet">
+      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
         <div className="min-w-48 flex-1">
-          <p className="font-medium text-ink">{t('bar.progress', { done: ev.ready, total: requirements.length })}</p>
-          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuemin={0} aria-valuemax={requirements.length} aria-valuenow={ev.ready}>
-            <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${requirements.length ? (ev.ready / requirements.length) * 100 : 0}%` }} />
+          <p className="flex items-baseline gap-2 text-ink">
+            <span className="font-mono text-lg font-semibold tabular">
+              {localizeDigits(`${ev.ready} / ${total}`, lang)}
+            </span>
+            <span className="text-sm text-ink-muted">{t('bar.ready_label')}</span>
+            <span className="sr-only">{t('bar.progress', { done: ev.ready, total })}</span>
+          </p>
+          <div className="mt-1.5 h-[3px] bg-rule" role="progressbar" aria-label={t('bar.progress', { done: ev.ready, total })} aria-valuemin={0} aria-valuemax={total} aria-valuenow={ev.ready}>
+            <div className="h-full bg-primary transition-[width] duration-500" style={{ width: `${total ? (ev.ready / total) * 100 : 0}%` }} />
           </div>
         </div>
 
         {n === 0 ? (
-          <p className="flex items-center gap-2 font-medium text-emerald-700">
-            <Ok className="h-5 w-5" aria-hidden />
-            {t('bar.ready_to_go')}
-          </p>
+          allOk ? (
+            <span key="stamp" className="stamp animate-stamp border-2 bg-st-ok-bg px-3 py-1 text-sm text-st-ok" role="status">
+              <STATUS_META.ok.icon className="h-5 w-5" aria-hidden />
+              {t('bar.stamp_ready')}
+            </span>
+          ) : (
+            <p className="flex items-center gap-2 font-medium text-st-ok" role="status">
+              <STATUS_META.ok.icon className="h-5 w-5" aria-hidden />
+              {t('bar.ready_to_go')}
+            </p>
+          )
         ) : (
           <Popover.Root open={open} onOpenChange={setOpen}>
             <Popover.Trigger asChild>
-              <Button variant="outline" className="border-red-200 text-red-800 hover:bg-red-50">
-                <Warn className="h-5 w-5" aria-hidden />
-                {n === 1 ? t('bar.problem') : t('bar.problems', { n })}
-                <span className="hidden text-slate-500 sm:inline">· {t('why.title')}</span>
-                <ChevronUp className={cn('h-4 w-4 transition-transform', !open && 'rotate-180')} aria-hidden />
+              <Button variant="destructive">
+                <Warn aria-hidden />
+                <span className="font-semibold">{n === 1 ? t('bar.problem') : t('bar.problems', { n })}</span>
+                <span className="hidden text-ink-muted sm:inline">{t('why.title')}</span>
+                <ChevronUp className={cn('transition-transform', !open && 'rotate-180')} aria-hidden />
               </Button>
             </Popover.Trigger>
             <Popover.Portal>
-              <Popover.Content side="top" align="end" sideOffset={10} className="z-50 w-[min(28rem,calc(100vw-2rem))] rounded-xl border border-line bg-white p-2 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2">
-                <p className="px-3 pb-2 pt-2 font-semibold text-ink">{t('why.title')}</p>
-                <ul className="max-h-[50vh] overflow-y-auto">
+              <Popover.Content side="top" align="end" sideOffset={10} className={cn(dialogClass, 'z-50 w-[min(30rem,calc(100vw-2rem))] overflow-hidden data-[state=open]:animate-in data-[state=open]:fade-in-0')}>
+                <p className="border-b-2 border-khaki px-4 py-3 font-serif text-lg font-semibold text-ink">{t('why.title')}</p>
+                <ol className="max-h-[50vh] overflow-y-auto">
                   {ev.blockers.map((b, i) => {
                     const m = STATUS_META[BLOCKER_STATUS[b.kind]];
+                    const req = requirements.find((q) => q.id === b.reqId);
                     return (
-                      <li key={i}>
+                      <li key={i} className="border-b border-rule last:border-b-0">
                         <button
                           type="button"
                           onClick={() => {
                             setOpen(false);
                             setTimeout(() => focusRow(b.reqId), 50);
                           }}
-                          className="flex min-h-11 w-full items-start gap-3 rounded-lg px-3 py-2 text-left hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          className="grid min-h-11 w-full grid-cols-[2.5rem_1.25rem_minmax(0,1fr)] items-start gap-2 px-4 py-2.5 text-left transition-colors hover:bg-khaki-soft/60"
                         >
-                          <m.icon className={cn('mt-0.5 h-5 w-5 shrink-0', m.tone === 'amber' ? 'text-amber-600' : m.tone === 'purple' ? 'text-violet-600' : 'text-red-600')} aria-hidden />
+                          <span className="font-mono text-sm font-semibold tabular text-khaki-deep">{req ? localizeDigits(reqCode(req), lang) : ''}</span>
+                          <m.icon className={cn('mt-0.5 h-[18px] w-[18px]', m.text)} aria-hidden />
                           <span className="text-ink">{reason(b)}</span>
                         </button>
                       </li>
                     );
                   })}
-                </ul>
+                </ol>
               </Popover.Content>
             </Popover.Portal>
           </Popover.Root>
         )}
 
-        <Button size="lg" disabled={!ev.canGenerate || gen.phase === 'building'} onClick={run}>
-          <PackageCheck className="h-5 w-5" aria-hidden />
+        <Button size="lg" className="ml-auto" disabled={!ev.canGenerate || gen.phase === 'building'} onClick={run}>
+          <PackageCheck aria-hidden />
           {t('bar.generate')}
         </Button>
       </div>

@@ -5,9 +5,7 @@ import { renderThumbnails } from '@/lib/pdf';
 import { commitMatch } from '@/actions';
 import { reqTitle, useStore, useT } from '@/store';
 import { localizeDigits } from '@/i18n';
-import { Button, cn } from './ui';
-
-const overlay = 'fixed inset-0 z-40 bg-slate-900/40 data-[state=open]:animate-in data-[state=open]:fade-in-0';
+import { Button, dialogClass, overlayClass as overlay } from './ui';
 
 export function PreviewSheet() {
   const t = useT();
@@ -37,30 +35,30 @@ export function PreviewSheet() {
     <Dialog.Root open={!!file} onOpenChange={(o) => !o && setPreview(null)}>
       <Dialog.Portal>
         <Dialog.Overlay className={overlay} />
-        <Dialog.Content className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-white shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-right">
-          <div className="flex items-start gap-3 border-b border-line px-5 py-4">
+        <Dialog.Content className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-rule bg-sheet shadow-lift focus:outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-right">
+          <div className="flex items-start gap-3 border-b-2 border-khaki px-5 py-4">
             <div className="min-w-0 flex-1">
-              <Dialog.Title className="truncate text-lg font-semibold text-ink">{t('preview.title', { name: file?.name ?? '' })}</Dialog.Title>
-              <Dialog.Description className="text-sm text-slate-500">
+              <Dialog.Title className="truncate font-serif text-lg font-semibold text-ink">{t('preview.title', { name: file?.name ?? '' })}</Dialog.Title>
+              <Dialog.Description className="text-sm text-ink-muted">
                 {t('preview.pages', { n: total, m: Math.min(MAX, total) })}
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <Button variant="ghost" size="icon" aria-label={t('preview.close')}>
-                <X className="h-5 w-5" aria-hidden />
+                <X aria-hidden />
               </Button>
             </Dialog.Close>
           </div>
-          <div className="flex-1 space-y-4 overflow-y-auto bg-slate-100 p-5">
-            {failed && <p className="text-red-700">{t('preview.failed')}</p>}
+          <div className="flex-1 space-y-4 overflow-y-auto bg-paper p-5">
+            {failed && <p className="text-tape">{t('preview.failed')}</p>}
             {pages.map((src, i) => (
               <figure key={i} className="animate-in fade-in-0">
-                <img src={src} alt={t('preview.page', { n: i + 1 })} className="w-full rounded-md border border-line bg-white shadow-sm" />
-                <figcaption className="mt-1 text-center text-sm text-slate-500">{t('preview.page', { n: i + 1 })}</figcaption>
+                <img src={src} alt={t('preview.page', { n: i + 1 })} className="w-full border border-rule bg-sheet" />
+                <figcaption className="mt-1 text-center font-mono text-sm text-ink-muted">{t('preview.page', { n: i + 1 })}</figcaption>
               </figure>
             ))}
             {!failed && pages.length < Math.min(MAX, total || 1) && (
-              <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 rounded-md bg-white/70 text-slate-500">
+              <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 border border-dashed border-rule bg-sheet text-ink-muted">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden />
                 {t('preview.loading')}
               </div>
@@ -82,9 +80,9 @@ export function ReplaceDialog() {
     <Dialog.Root open={!!pendingReplace} onOpenChange={(o) => !o && setPendingReplace(null)}>
       <Dialog.Portal>
         <Dialog.Overlay className={overlay} />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=open]:zoom-in-95">
-          <Dialog.Title className="text-lg font-semibold text-ink">{t('replace.title')}</Dialog.Title>
-          <Dialog.Description className="mt-2 text-slate-600">
+        <Dialog.Content className={`${dialogClass} fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 p-6 data-[state=open]:animate-in data-[state=open]:fade-in-0`}>
+          <Dialog.Title className="border-b border-rule pb-3 font-serif text-xl font-semibold text-ink">{t('replace.title')}</Dialog.Title>
+          <Dialog.Description className="mt-3 text-ink">
             {t('replace.body', { doc: req ? reqTitle(req, lang) : '', old: oldName, new: newName })}
           </Dialog.Description>
           <div className="mt-6 flex justify-end gap-3">
@@ -126,15 +124,15 @@ export function GenerateDialogs({ gen, onClose, onDownload }: { gen: GenState; o
           <Dialog.Content
             onEscapeKeyDown={(e) => e.preventDefault()}
             onPointerDownOutside={(e) => e.preventDefault()}
-            className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl focus:outline-none"
+            className={`${dialogClass} fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 p-6`}
           >
-            <Dialog.Title className="flex items-center gap-3 text-lg font-semibold text-ink">
+            <Dialog.Title className="flex items-center gap-3 font-serif text-lg font-semibold text-ink">
               <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden />
               {t('gen.building')}
             </Dialog.Title>
-            <Dialog.Description className="mt-2 text-sm text-slate-500">{t('gen.progress', { done: gen.done, total: gen.total || 1 })}</Dialog.Description>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+            <Dialog.Description className="mt-2 font-mono text-sm text-ink-muted">{t('gen.progress', { done: gen.done, total: gen.total || 1 })}</Dialog.Description>
+            <div className="mt-4 h-[3px] bg-rule" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+              <div className="h-full bg-primary transition-[width]" style={{ width: `${pct}%` }} />
             </div>
           </Dialog.Content>
         </Dialog.Portal>
@@ -143,41 +141,41 @@ export function GenerateDialogs({ gen, onClose, onDownload }: { gen: GenState; o
       <Dialog.Root open={gen.phase === 'done'} onOpenChange={(o) => !o && onClose()}>
         <Dialog.Portal>
           <Dialog.Overlay className={overlay} />
-          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl bg-white shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=open]:zoom-in-95">
-            <div className="flex items-start gap-3 p-6 pb-4">
-              <CheckCircle2 className="h-7 w-7 shrink-0 text-emerald-600" aria-hidden />
+          <Dialog.Content className={`${dialogClass} fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col data-[state=open]:animate-in data-[state=open]:fade-in-0`}>
+            <div className="flex items-start gap-3 border-b-2 border-khaki p-6 pb-4">
+              <CheckCircle2 className="h-7 w-7 shrink-0 text-st-ok" aria-hidden />
               <div>
-                <Dialog.Title className="text-lg font-semibold text-ink">{t('gen.done_title')}</Dialog.Title>
-                <Dialog.Description className="mt-1 text-slate-600">
+                <Dialog.Title className="font-serif text-xl font-semibold text-ink">{t('gen.done_title')}</Dialog.Title>
+                <Dialog.Description className="mt-1 text-ink">
                   {t('gen.done_body', { pages: gen.result?.totalPages ?? 0, name: gen.result?.name ?? '' })}
                 </Dialog.Description>
               </div>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto border-y border-line px-6 py-4">
-              <h3 className="text-sm font-semibold text-slate-600">{t('gen.included')}</h3>
-              <ol className="mt-2 space-y-1.5">
+            <div className="min-h-0 flex-1 overflow-y-auto border-b border-rule px-6 py-4">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-muted">{t('gen.included')}</h3>
+              <ol className="mt-2 border-t border-rule">
                 {gen.result?.docs.map((d) => (
-                  <li key={d.order} className="flex items-baseline gap-3">
-                    <span className="w-6 shrink-0 text-right text-sm font-semibold tabular-nums text-primary-dark">{localizeDigits(String(d.order), lang)}</span>
+                  <li key={d.order} className="flex items-baseline gap-3 border-b border-rule py-2">
+                    <span className="w-7 shrink-0 font-mono text-sm font-semibold tabular text-khaki-deep">{localizeDigits(String(d.order), lang)}</span>
                     <span className="min-w-0 flex-1">
                       <span className="text-ink">{d.title}</span>
-                      <span className="block truncate text-sm text-slate-500">{d.fileName}</span>
+                      <span className="block truncate text-sm text-ink-muted">{d.fileName}</span>
                     </span>
-                    <span className="shrink-0 text-sm text-slate-500">{t('gen.doc_pages', { n: d.pages })}</span>
+                    <span className="shrink-0 font-mono text-sm tabular text-ink-muted">{t('gen.doc_pages', { n: d.pages })}</span>
                   </li>
                 ))}
               </ol>
             </div>
-            <div className={cn('flex flex-wrap justify-end gap-3 p-6 pt-4')}>
+            <div className="flex flex-wrap justify-end gap-3 p-6 pt-4">
               <Dialog.Close asChild>
                 <Button variant="ghost">{t('gen.close')}</Button>
               </Dialog.Close>
               <Button variant="outline" onClick={() => gen.result && window.open(gen.result.url, '_blank', 'noopener')}>
-                <ExternalLink className="h-4 w-4" aria-hidden />
+                <ExternalLink aria-hidden />
                 {t('gen.open_tab')}
               </Button>
               <Button onClick={onDownload}>
-                <Download className="h-4 w-4" aria-hidden />
+                <Download aria-hidden />
                 {t('gen.download_again')}
               </Button>
             </div>

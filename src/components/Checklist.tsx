@@ -8,16 +8,16 @@ import { localizeDigits } from '@/i18n';
 import { commitMatch, requestMatch, unmatch } from '@/actions';
 import { reqTitle, tr, useEvaluation, useStore, useT } from '@/store';
 import { StatusBadge } from './status';
-import { Badge, Button, Card, cn } from './ui';
+import { Button, Card, Tag, cn } from './ui';
 
 export function Checklist() {
   const t = useT();
   const requirements = useStore((s) => s.requirements);
   return (
-    <Card>
-      <div className="flex items-baseline justify-between gap-3 border-b border-line px-6 py-4">
-        <h2 className="text-lg font-semibold text-ink">{t('req.heading')}</h2>
-        <span className="text-sm text-slate-500">{t('req.count', { n: requirements.length })}</span>
+    <Card className="overflow-hidden">
+      <div className="flex items-baseline justify-between gap-3 border-b-2 border-khaki px-6 py-4">
+        <h2 className="text-xl font-semibold text-ink">{t('req.heading')}</h2>
+        <span className="text-sm text-ink-muted">{t('req.count', { n: requirements.length })}</span>
       </div>
       <ol>
         {requirements.map((r) => (
@@ -52,68 +52,73 @@ function RequirementRow({ req }: { req: Requirement }) {
       id={`req-${req.id}`}
       ref={setNodeRef}
       className={cn(
-        'scroll-mt-24 border-b border-line px-6 py-4 transition-colors last:border-b-0',
-        isOver && 'bg-primary-soft',
-        anim === 'error' && 'animate-shake bg-red-50',
-        anim === 'focus' && 'animate-pulse-ring bg-amber-50',
+        'grid scroll-mt-28 grid-cols-[3.25rem_minmax(0,1fr)] border-b border-rule transition-colors last:border-b-0 hover:bg-khaki-soft/35',
+        isOver && 'bg-khaki-soft/60 hover:bg-khaki-soft/60',
+        anim === 'error' && 'animate-shake bg-tape-soft hover:bg-tape-soft',
+        anim === 'focus' && 'bg-khaki-soft hover:bg-khaki-soft',
       )}
     >
-      <div className="flex items-start gap-4">
-        <span
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-base font-semibold tabular-nums text-primary-dark"
-          aria-label={t('req.order', { n: req.order })}
-        >
-          {localizeDigits(String(req.order), lang)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-            <div className="min-w-0">
-              <p className="font-medium text-ink">{reqTitle(req, lang)}</p>
-              <p className="truncate text-sm text-slate-500">{lang === 'bn' ? req.title_en : req.title_bn}</p>
+      {/* register margin: order number */}
+      <span
+        className="border-r border-khaki/70 pt-4 text-center font-mono text-base font-semibold tabular text-khaki-deep"
+        aria-label={t('req.order', { n: req.order })}
+      >
+        {localizeDigits(String(req.order).padStart(2, '0'), lang)}
+      </span>
+      <div className="min-w-0 px-5 py-4">
+        <div>
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div className="min-w-0 flex-1 basis-56">
+              <p className="font-medium text-ink [overflow-wrap:anywhere]">{reqTitle(req, lang)}</p>
+              <p className="text-sm text-ink-muted [overflow-wrap:anywhere]">{lang === 'bn' ? req.title_en : req.title_bn}</p>
+              <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                <Tag className={req.mandatory ? 'text-primary' : 'text-ink-muted'}>{req.mandatory ? t('req.mandatory') : t('req.optional')}</Tag>
+                {req.expiry_required && (
+                  <Tag className="text-ink-muted">
+                    <CalendarCheck className="h-3.5 w-3.5" aria-hidden />
+                    {t('req.expiry')}
+                  </Tag>
+                )}
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {req.expiry_required && (
-                <Badge tone="neutral">
-                  <CalendarCheck className="h-4 w-4" aria-hidden />
-                  {t('req.expiry')}
-                </Badge>
-              )}
-              <Badge tone={req.mandatory ? 'primary' : 'gray'}>{req.mandatory ? t('req.mandatory') : t('req.optional')}</Badge>
+            <span aria-live="polite">
               <StatusBadge status={status} />
-            </div>
+            </span>
           </div>
 
           {/* Slot */}
           <div className="mt-3">
             {file && !editing ? (
-              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-slate-50 px-3 py-2">
-                <FileText className="h-5 w-5 shrink-0 text-red-600" aria-hidden />
+              <div key={file.id} className="flex animate-settle flex-wrap items-center gap-x-2 gap-y-1 rounded-sm border border-rule border-l-[3px] border-l-primary bg-sheet px-3 py-1.5">
+                <FileText className="h-[18px] w-[18px] shrink-0 text-tape" aria-hidden />
                 <span className="min-w-0 flex-1 truncate font-medium text-ink" title={file.name}>
                   {file.name}
                 </span>
-                <span className="text-sm text-slate-500">
+                <span className="font-mono text-sm tabular text-ink-muted">
                   {file.pageCount === 1 ? t('files.page') : t('files.pages', { n: file.pageCount })}
                 </span>
-                <Button variant="ghost" className="min-h-9 px-2 text-sm" onClick={() => useStore.getState().setPreview(file.id)}>
-                  <Eye className="h-4 w-4" aria-hidden />
-                  {t('slot.preview')}
-                </Button>
-                <Button variant="ghost" className="min-h-9 px-2 text-sm" onClick={() => setEditing(true)}>
-                  <Replace className="h-4 w-4" aria-hidden />
-                  {t('slot.change')}
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label={t('slot.unmatch', { doc: reqTitle(req, lang) })} onClick={() => unmatch(req.id)}>
-                  <X className="h-4 w-4" aria-hidden />
-                </Button>
+                <span className="flex items-center">
+                  <Button variant="ghost" className="min-h-9 px-2 text-sm [&_svg]:h-[18px] [&_svg]:w-[18px]" onClick={() => useStore.getState().setPreview(file.id)}>
+                    <Eye aria-hidden />
+                    {t('slot.preview')}
+                  </Button>
+                  <Button variant="ghost" className="min-h-9 px-2 text-sm [&_svg]:h-[18px] [&_svg]:w-[18px]" onClick={() => setEditing(true)}>
+                    <Replace aria-hidden />
+                    {t('slot.change')}
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 hover:text-tape" aria-label={t('slot.unmatch', { doc: reqTitle(req, lang) })} onClick={() => unmatch(req.id)}>
+                    <X aria-hidden />
+                  </Button>
+                </span>
               </div>
             ) : (
               <div
                 className={cn(
-                  'flex flex-wrap items-center gap-3 rounded-lg border-2 border-dashed px-3 py-2 transition-colors',
-                  isOver ? 'border-primary bg-white' : dragging ? 'border-primary/50' : 'border-slate-300',
+                  'flex flex-wrap items-center gap-3 rounded-sm border-2 border-dashed px-3 py-2 transition-colors',
+                  isOver ? 'border-primary bg-khaki-soft' : dragging ? 'border-khaki bg-sheet' : 'border-rule bg-sheet',
                 )}
               >
-                <span className={cn('text-sm', isOver ? 'font-medium text-primary-dark' : 'text-slate-500')}>
+                <span className={cn('text-sm', isOver ? 'font-medium text-primary' : 'text-ink-muted')}>
                   {isOver ? t('slot.drop_now') : t('slot.drop')}
                 </span>
                 <FileSelect
@@ -132,7 +137,7 @@ function RequirementRow({ req }: { req: Requirement }) {
                 )}
               </div>
             )}
-            {!file && !req.mandatory && <p className="mt-1.5 text-sm text-slate-500">{t('slot.optional_skip')}</p>}
+            {!file && !req.mandatory && <p className="mt-1.5 text-sm text-ink-muted">{t('slot.optional_skip')}</p>}
           </div>
 
           {file && req.expiry_required && tender && (
@@ -155,11 +160,11 @@ function FileSelect({ reqId, onPicked }: { reqId: string; onPicked: (fileId: str
     return r ? reqTitle(r, lang) : rid;
   };
   const docTitle = title(reqId);
-  if (usable.length === 0) return <span className="text-sm text-slate-500">· {t('slot.no_files')}</span>;
+  if (usable.length === 0) return <span className="text-sm text-ink-muted">{t('slot.no_files')}</span>;
   return (
     <select
       aria-label={t('slot.choose_label', { doc: docTitle })}
-      className="min-h-10 w-0 min-w-[12rem] flex-1 rounded-lg border border-line bg-white px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="min-h-10 w-0 min-w-[12rem] flex-1 rounded-sm border border-rule bg-sheet px-3 text-base text-ink hover:border-khaki"
       value=""
       onChange={(e) => e.target.value && onPicked(e.target.value)}
     >
@@ -205,12 +210,12 @@ function ExpiryField({ reqId, value, deadline, status, title }: { reqId: string;
             else toast.success(tr('toast.expiry_ok', { doc: title }));
           }}
           className={cn(
-            'mt-1 min-h-10 rounded-lg border bg-white px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-            expired ? 'border-red-400 text-red-800' : 'border-line text-ink',
+            'mt-1 min-h-10 rounded-sm border bg-sheet px-3 font-mono text-base tabular',
+            expired ? 'border-st-expired text-st-expired' : 'border-rule text-ink hover:border-khaki',
           )}
         />
       </div>
-      <p id={`${id}-help`} className={cn('pb-2 text-sm', expired ? 'font-medium text-red-700' : onDeadline ? 'text-amber-800' : 'text-slate-500')}>
+      <p id={`${id}-help`} className={cn('pb-2 text-sm', expired ? 'font-medium text-st-expired' : onDeadline ? 'font-medium text-st-need' : 'text-ink-muted')}>
         {expired
           ? t('slot.expired_on', { expiry: value, deadline })
           : onDeadline

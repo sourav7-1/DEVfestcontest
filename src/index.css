@@ -2,9 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
-html { font-size: 16px; }
-body { @apply bg-canvas text-ink antialiased; }
-:lang(bn) body { line-height: 1.65; }
+/* "Tender file desk" palette (RGB triplets so Tailwind can apply opacity). */
+:root {
+  --paper: 245 240 230; /* #F5F0E6 */
+  --sheet: 255 253 248; /* #FFFDF8 */
+  --ink: 30 43 42; /* #1E2B2A */
+  --ink-muted: 94 107 103; /* #5E6B67 */
+  --rule: 226 217 198; /* #E2D9C6 */
+  --khaki: 200 166 106; /* #C8A66A — accents only, never text */
+  --khaki-soft: 239 227 200; /* #EFE3C8 */
+  --khaki-deep: 122 94 42; /* #7A5E2A — khaki-toned text that passes AA */
+  --primary: 31 92 71; /* #1F5C47 */
+  --primary-hover: 23 74 57; /* #174A39 */
+  --tape: 178 58 46; /* #B23A2E */
+  --ok: 39 110 69; /* #276E45: #2E7D4F darkened for AA on its tint (4.36 → 5.34) */
+  --ok-bg: 228 242 232;
+  --missing: 178 58 46;
+  --missing-bg: 248 227 223;
+  --expired: 156 47 36; /* #9C2F24 */
+  --expired-bg: 246 221 216;
+  --need: 140 88 12; /* #8C580C: #A86B12 darkened for AA on its tint */
+  --need-bg: 251 239 214;
+  --none: 94 100 97; /* #5E6461: #6B716E darkened for AA on its tint */
+  --none-bg: 236 234 228;
+  --dup: 138 90 43; /* #8A5A2B */
+  --dup-bg: 241 230 214;
+  --disabled: 224 219 207;
+  --disabled-fg: 78 84 81; /* #4E5451 */
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+  }
+  body {
+    @apply bg-paper font-sans text-base text-ink antialiased;
+    line-height: 1.55;
+  }
+  :lang(bn) body {
+    line-height: 1.7;
+  }
+  h1,
+  h2,
+  h3,
+  .font-serif {
+    font-family: theme('fontFamily.serif');
+  }
+  ::selection {
+    background: rgb(var(--khaki-soft));
+    color: rgb(var(--ink));
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: 2px;
+  }
+  /* lucide icons: one stroke weight everywhere */
+  svg.lucide {
+    stroke-width: 1.75;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Rubber-stamp label: statuses and tags */
+  .stamp {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs font-semibold uppercase;
+    letter-spacing: 0.06em;
+    border: 1.5px solid currentColor;
+  }
+  /* A sheet of paper with its top-right corner folded */
+  .sheet-fold {
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  }
+  .sheet-fold::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(to bottom left, transparent 50%, rgb(var(--rule)) 50%);
+    border-bottom-left-radius: 2px;
+  }
+  /* Field labels on the file cover */
+  .label-caps {
+    @apply text-sm text-khaki-deep;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.04em;
+  }
+  /* Bangla has no case: small caps would only shrink it */
+  :lang(bn) .label-caps {
+    font-variant-caps: normal;
+    letter-spacing: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -40,6 +40,7 @@ function useRequirementsLoader() {
 
 export function RequirementsHero() {
   const t = useT();
+  const lang = useStore((s) => s.lang);
   const { error, load } = useRequirementsLoader();
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     multiple: false,
@@ -47,60 +48,59 @@ export function RequirementsHero() {
     onDrop: (files) => load(files[0]),
   });
   return (
-    <Card className="mx-auto mt-6 max-w-4xl overflow-hidden">
-      <div className="grid gap-0 md:grid-cols-[1.4fr_1fr]">
-        <div className="p-8">
-          <h1 className="text-[1.75rem] font-semibold leading-tight text-ink">{t('hero.title')}</h1>
-          <p className="mt-3 max-w-prose text-slate-600">{t('hero.lead')}</p>
-          <div
-            {...getRootProps({
-              onClick: open,
-              role: 'button',
-              tabIndex: 0,
-              'aria-label': t('hero.drop'),
-              onKeyDown: (e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), open()),
-            })}
-            className={cn(
-              'mt-6 flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-              isDragActive ? 'border-primary bg-primary-soft' : 'border-slate-300 bg-slate-50 hover:border-primary/60',
-            )}
-          >
-            <input {...getInputProps({ accept: '.json,application/json' })} />
-            <FileJson className="h-10 w-10 text-primary" aria-hidden />
-            <span className="text-lg font-medium text-ink">{isDragActive ? t('hero.drop_active') : t('hero.drop')}</span>
-            <span className="text-sm text-slate-500">{t('hero.drop_hint')}</span>
-            <Button type="button" variant="outline" tabIndex={-1} className="mt-1">
-              {t('hero.choose')}
-            </Button>
-          </div>
-          {error && (
-            <Alert className="mt-4 animate-in fade-in-0">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
-              <div>
-                <p className="font-semibold">{t('err.title')}</p>
-                <p className="mt-1 break-words">{error}</p>
-              </div>
-            </Alert>
+    <Card className="mt-2 grid overflow-hidden md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="p-8">
+        <h1 className="max-w-[34ch] text-2xl font-semibold text-ink">{t('hero.title')}</h1>
+        <p className="mt-3 max-w-[60ch] text-ink-muted">{t('hero.lead')}</p>
+        <div
+          {...getRootProps({
+            onClick: open,
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': t('hero.drop'),
+            onKeyDown: (e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), open()),
+          })}
+          className={cn(
+            'mt-6 flex cursor-pointer items-center gap-4 rounded-md border-2 border-dashed px-5 py-6 transition-colors',
+            isDragActive ? 'border-primary bg-khaki-soft' : 'border-rule bg-paper/60 hover:border-khaki',
           )}
+        >
+          <input {...getInputProps({ accept: '.json,application/json' })} />
+          <FileJson className="h-8 w-8 shrink-0 text-khaki-deep" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-ink">{isDragActive ? t('hero.drop_active') : t('hero.drop')}</p>
+            <p className="text-sm text-ink-muted">{t('hero.drop_hint')}</p>
+          </div>
+          <Button type="button" variant="outline" tabIndex={-1} className="hidden shrink-0 sm:inline-flex">
+            {t('hero.choose')}
+          </Button>
         </div>
-        <div className="border-t border-line bg-slate-50 p-8 md:border-l md:border-t-0">
-          <h2 className="text-base font-semibold text-ink">{t('hero.how')}</h2>
-          <ol className="mt-4 space-y-5">
-            {(['hero.how1', 'hero.how2', 'hero.how3', 'hero.how4'] as const).map((k, i) => (
-              <li key={k} className="flex gap-3">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary-dark">
-                  {localizeDigits(String(i + 1), useStore.getState().lang)}
-                </span>
-                <span className="text-slate-700">{t(k)}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
+        {error && (
+          <Alert className="mt-4 animate-in fade-in-0">
+            <AlertTriangle className="mt-0.5 shrink-0" aria-hidden />
+            <div className="min-w-0">
+              <p className="font-semibold">{t('err.title')}</p>
+              <p className="mt-1 break-words">{error}</p>
+            </div>
+          </Alert>
+        )}
+      </div>
+      <div className="border-t border-rule bg-paper/50 p-8 md:border-l md:border-t-0">
+        <h2 className="text-lg font-semibold text-ink">{t('hero.how')}</h2>
+        <ol className="mt-4 border-t border-rule">
+          {(['hero.how1', 'hero.how2', 'hero.how3', 'hero.how4'] as const).map((k, i) => (
+            <li key={k} className="grid grid-cols-[2rem_1fr] border-b border-rule py-3">
+              <span className="font-mono text-sm font-semibold tabular text-khaki-deep">{localizeDigits(String(i + 1), lang)}</span>
+              <span className="text-ink">{t(k)}</span>
+            </li>
+          ))}
+        </ol>
       </div>
     </Card>
   );
 }
 
+/** The front of the tender file: khaki cover, labeled fields, deadline. */
 export function TenderSummary() {
   const t = useT();
   const { tender, lang } = useStore();
@@ -118,43 +118,40 @@ export function TenderSummary() {
     ['tender.bidder', tender.bidder],
   ];
   return (
-    <Card className="p-6">
-      <div className="flex flex-wrap items-start gap-4">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm text-slate-500">
-            {t('tender.summary')} · <span className="font-mono">{tender.tender_id}</span>
+    <section aria-label={t('tender.summary')} className="relative overflow-hidden rounded-r-lg border border-l-4 border-rule border-l-khaki bg-khaki-soft">
+      {/* lal fita: the red tape across the file corner */}
+      <span aria-hidden className="pointer-events-none absolute -right-10 top-5 h-2.5 w-40 rotate-45 bg-tape/85" />
+      <div className="grid gap-6 p-6 pr-14 md:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="min-w-0">
+          <p className="label-caps">
+            {t('tender.file_no')} <span className="font-mono font-medium normal-case text-ink [font-variant-caps:normal]">{tender.tender_id}</span>
           </p>
           <h1 className="mt-1 text-xl font-semibold text-ink">{tender.title || t('tender.not_given')}</h1>
-          <dl className="mt-3 grid gap-x-8 gap-y-1 sm:grid-cols-2">
+          <dl className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
             {rows.map(([k, v]) => (
-              <div key={k} className="flex gap-2">
-                <dt className="text-slate-500">{t(k)}:</dt>
-                <dd className="font-medium text-ink">{v || t('tender.not_given')}</dd>
+              <div key={k} className="min-w-0 border-b border-khaki/60 pb-1">
+                <dt className="label-caps">{t(k)}</dt>
+                <dd className="text-ink">{v || t('tender.not_given')}</dd>
               </div>
             ))}
           </dl>
         </div>
-        <div
-          className={cn(
-            'flex items-center gap-3 rounded-xl border px-4 py-3',
-            days < 0 ? 'border-red-200 bg-red-50' : days <= 3 ? 'border-amber-200 bg-amber-50' : 'border-line bg-slate-50',
-          )}
-        >
-          <CalendarDays className={cn('h-6 w-6', days < 0 ? 'text-red-700' : 'text-primary')} aria-hidden />
-          <div>
-            <p className="text-sm text-slate-500">{t('tender.deadline')}</p>
-            <p className="font-semibold text-ink">{dateText}</p>
-            <p className={cn('text-sm font-medium', days < 0 ? 'text-red-700' : days <= 3 ? 'text-amber-800' : 'text-primary-dark')}>
-              {countdown}
-            </p>
-          </div>
+        <div className="self-start rounded-md border border-khaki/70 bg-sheet px-4 py-3 md:min-w-56">
+          <p className="label-caps flex items-center gap-1.5">
+            <CalendarDays className="h-[18px] w-[18px]" aria-hidden />
+            {t('tender.deadline')}
+          </p>
+          <p className="mt-0.5 font-mono text-lg font-medium tabular text-ink">{dateText}</p>
+          <p className={cn('text-sm font-semibold', days < 0 ? 'text-tape' : days <= 3 ? 'text-st-need' : 'text-primary')}>{countdown}</p>
         </div>
       </div>
-      <input {...getInputProps({ accept: '.json,application/json' })} />
-      <Button variant="ghost" className="mt-3 -ml-2" onClick={open}>
-        <RefreshCw className="h-4 w-4" aria-hidden />
-        {t('tender.replace')}
-      </Button>
-    </Card>
+      <div className="border-t border-khaki/60 px-6 py-2">
+        <input {...getInputProps({ accept: '.json,application/json' })} />
+        <Button variant="ghost" className="-ml-3 min-h-9 text-sm text-ink hover:bg-sheet/70 [&_svg]:h-[18px] [&_svg]:w-[18px]" onClick={open}>
+          <RefreshCw aria-hidden />
+          {t('tender.replace')}
+        </Button>
+      </div>
+    </section>
   );
 }
