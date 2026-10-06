@@ -1,0 +1,97 @@
+{
+  "tender_id": "PWD-DHK-2026-0417",
+  "title": "Construction of 3-Storey Upazila Health Complex Annex, Savar",
+  "procuring_entity": "Public Works Department, Dhaka Division-2",
+  "bidder": "Rahman Builders & Engineers Ltd.",
+  "submission_deadline": "2026-10-20",
+  "requirements": [
+    {
+      "id": "bank_solvency",
+      "order": 5,
+      "title_en": "Bank Solvency Certificate",
+      "title_bn": "ব্যাংক সচ্ছলতা সনদ",
+      "mandatory": true,
+      "expiry_required": true
+    },
+    {
+      "id": "trade_license",
+      "order": 1,
+      "title_en": "Valid Trade License",
+      "title_bn": "হালনাগাদ ট্রেড লাইসেন্স",
+      "mandatory": true,
+      "expiry_required": true
+    },
+    {
+      "id": "iso_cert",
+      "order": 11,
+      "title_en": "ISO 9001 Certificate",
+      "title_bn": "আইএসও ৯০০১ সনদ",
+      "mandatory": false,
+      "expiry_required": true
+    },
+    {
+      "id": "tin",
+      "order": 2,
+      "title_en": "TIN Certificate",
+      "title_bn": "টিআইএন সনদ",
+      "mandatory": true,
+      "expiry_required": false
+    },
+    {
+      "id": "experience",
+      "order": 6,
+      "title_en": "Similar Work Experience Certificate",
+      "title_bn": "অনুরূপ কাজের অভিজ্ঞতার সনদ",
+      "mandatory": true,
+      "expiry_required": false
+    },
+    {
+      "id": "tax_clearance",
+      "order": 4,
+      "title_en": "Income Tax Clearance Certificate",
+      "title_bn": "আয়কর পরিশোধ সনদ",
+      "mandatory": true,
+      "expiry_required": true
+    },
+    {
+      "id": "manufacturer_auth",
+      "order": 10,
+      "title_en": "Manufacturer Authorization Letter",
+      "title_bn": "প্রস্তুতকারকের অনুমোদনপত্র",
+      "mandatory": true,
+      "expiry_required": false
+    },
+    {
+      "id": "vat_bin",
+      "order": 3,
+      "title_en": "VAT Registration (BIN) Certificate",
+      "title_bn": "ভ্যাট নিবন্ধন (বিআইএন) সনদ",
+      "mandatory": true,
+      "expiry_required": false
+    },
+    {
+      "id": "power_of_attorney",
+      "order": 9,
+      "title_en": "Power of Attorney",
+      "title_bn": "পাওয়ার অব অ্যাটর্নি",
+      "mandatory": true,
+      "expiry_required": false
+    },
+    {
+      "id": "audited_financials",
+      "order": 7,
+      "title_en": "Audited Financial Statement (last 3 years)",
+      "title_bn": "নিরীক্ষিত আর্থিক বিবরণী (গত ৩ বছর)",
+      "mandatory": true,
+      "expiry_required": false
+    },
+    {
+      "id": "bid_security",
+      "order": 8,
+      "title_en": "Bid Security (Bank Guarantee)",
+      "title_bn": "বিড সিকিউরিটি (ব্যাংক গ্যারান্টি)",
+      "mandatory": true,
+      "expiry_required": true
+    }
+  ]
+}
