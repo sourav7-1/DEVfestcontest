@@ -2,8 +2,12 @@ import type { Requirement, Tender } from './types';
 
 /** Error carrying an i18n key so the UI can show it in either language. */
 export class RequirementsError extends Error {
-  constructor(public key: string, public params: Record<string, string | number> = {}) {
+  key: string;
+  params: Record<string, string | number>;
+  constructor(key: string, params: Record<string, string | number> = {}) {
     super(`${key} ${JSON.stringify(params)}`);
+    this.key = key;
+    this.params = params;
   }
 }
 

@@ -1,4 +1,4 @@
-import { Status, type Requirement, type UploadedFile } from './types';
+import { Status, type Requirement, type UploadedFile } from './types.ts';
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 

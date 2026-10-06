@@ -1,0 +1,18 @@
+{
+  "trade_lic": { "file": "TL_2026.pdf", "expiry": "2026-11-15" },
+  "tax_cert": { "file": "scan_17.pdf", "expiry": "2026-12-31" },
+  "bank_ref": { "file": "bank_reference.pdf" },
+  "company_reg": { "file": "incorporation.pdf" },
+  "work_plan": { "file": "methodology_v3.pdf" },
+  "insurance": { "file": "CAR_policy_2026.pdf", "expiry": "2026-11-14", "exclude": "optional insurance expired one day before the deadline - left out instead of submitting an invalid document" },
+  "safety_policy": { "file": "HSE_policy_signed.pdf" },
+  "expect": {
+    "trade_lic": "ok",
+    "tax_cert": "ok",
+    "bank_ref": "not_provided",
+    "company_reg": "ok",
+    "work_plan": "ok",
+    "insurance": "expired",
+    "safety_policy": "not_provided"
+  }
+}

@@ -4,11 +4,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { parseRequirements } from '../src/lib/requirements.ts';
 
 const dir = process.argv[2] ?? 'sample-pack';
-const req = JSON.parse(fs.readFileSync(path.join(dir, 'requirements.json'), 'utf8'));
-console.log('orders in file order:', req.requirements.map((r) => r.order).join(', '));
-console.log('deadline:', req.submission_deadline ?? req.deadline);
+const raw = JSON.parse(fs.readFileSync(path.join(dir, 'requirements.json'), 'utf8'));
+console.log('orders in file order:', (raw.requirements ?? []).map((r) => r.order).join(', '));
+const { tender, requirements } = parseRequirements(fs.readFileSync(path.join(dir, 'requirements.json'), 'utf8'));
+console.log('tender:', tender.tender_id, '| deadline:', tender.deadline);
+for (const r of requirements) console.log(`  ${r.order}. ${r.id} ${r.mandatory ? 'M' : 'O'}${r.expiry_required ? ' +expiry' : ''}`);
 
 const docs = path.join(dir, 'documents');
 const hashes = {};
@@ -32,7 +35,7 @@ for (const name of fs.readdirSync(docs).sort()) {
       status = e?.name === 'PasswordException' ? 'ENCRYPTED' : `CORRUPT (${e?.name}: ${e?.message})`;
     }
   }
-  const dates = text.match(/(valid until|valid up to|expiry date|expires?)[^|]*?(\d{1,2}[ /-][A-Za-z0-9]+[ /-]\d{4}|\d{4}-\d{2}-\d{2})/gi);
+  const dates = text.match(/(valid until|valid till|valid up to|until|expiry date|expires?)[^|]*?(\d{1,2}[ /-][A-Za-z0-9]+[ /-]\d{4}|\d{4}-\d{2}-\d{2})/gi);
   console.log(`\n## ${name}\n size=${bytes.length} head=${head} sha256=${hash.slice(0, 16)}… status=${status} pages=${pages}`);
   if (text) console.log(' text:', text.slice(0, 220));
   if (dates) console.log(' dates:', dates.join(' ; '));

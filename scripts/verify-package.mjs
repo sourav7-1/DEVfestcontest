@@ -36,13 +36,21 @@ const doc = await getDocument({ data: new Uint8Array(fs.readFileSync(file)), ver
 const N = doc.numPages;
 console.log(`${file}: ${N} pages`);
 const texts = [];
+const overlaps = [];
 for (let i = 1; i <= N; i++) {
-  const c = await (await doc.getPage(i)).getTextContent();
+  const page = await doc.getPage(i);
+  const c = await page.getTextContent();
   texts.push(c.items.map((it) => it.str).join(' ').replace(/\s+/g, ' '));
+  // Geometry: only the footer may sit inside the 28pt band at the bottom of the (unrotated) page.
+  if (page.rotate !== 0) overlaps.push(`p${i}: /Rotate ${page.rotate} left in output`);
+  for (const it of c.items) {
+    if (!it.str.trim() || /Page \d+ of \d+/.test(it.str)) continue;
+    if (it.transform[5] - page.view[1] < 28) overlaps.push(`p${i}: "${it.str.slice(0, 30)}" at y=${it.transform[5].toFixed(1)} is inside the footer band`);
+  }
   console.log(`  p${i}: ${texts[i - 1].slice(0, 110)}${texts[i - 1].length > 110 ? '…' : ''}`);
 }
 
-const fails = [];
+const fails = [...overlaps];
 const tid = (texts[0].match(/Tender ID (\S+)/) ?? [])[1];
 if (!tid) fails.push('cover: "Tender ID" not found');
 texts.forEach((t, i) => {

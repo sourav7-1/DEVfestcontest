@@ -30,12 +30,14 @@ export interface UploadedFile {
   error?: FileError;
 }
 
-export enum Status {
-  OK = 'ok',
-  Missing = 'missing',
-  Expired = 'expired',
-  ExpiryNeeded = 'expiry_needed',
-  NotProvided = 'not_provided',
-  Duplicate = 'duplicate',
-  Error = 'error',
-}
+// Plain object (not a TS enum) so src/lib runs in Node with type stripping.
+export const Status = {
+  OK: 'ok',
+  Missing: 'missing',
+  Expired: 'expired',
+  ExpiryNeeded: 'expiry_needed',
+  NotProvided: 'not_provided',
+  Duplicate: 'duplicate',
+  Error: 'error',
+} as const;
+export type Status = (typeof Status)[keyof typeof Status];
