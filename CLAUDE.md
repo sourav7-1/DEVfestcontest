@@ -7,6 +7,7 @@ Competition project: correctness of rules first, then polished UX. Prompts for e
 
 ## Commands
 - `npm run dev` · `npm test` (vitest) · `npm run build` (tsc -b + vite build) — keep both green before committing.
+- Deploy: Vercel (https://de-vfestcontest.vercel.app/) publishes `main`; `.github/workflows/deploy.yml` tests/builds and targets GitHub Pages. Keep `base: './'` in `vite.config.ts` — an absolute `/DEVfestcontest/` base made the Vercel site blank (assets 404 at the domain root).
 - `node scripts/inspect-pack.mjs <dir>` — Step-0 inspector for any pack (magic bytes, SHA-256, pages, encrypted/corrupt, text, dates).
 - `sample-pack/` = the OFFICIAL contest pack (from `problem-pack.zip`; never regenerate or edit its documents). Its resolution is `sample-pack/resolution.json`.
 - `node scripts/build-package.mjs <pack> [resolution.json] [--out=dir]` — builds `output/<tender_id>_Package.pdf` with the app's own lib; asserts `expect` statuses, checks every expiry date is printed in the document, refuses while anything blocks, then runs the verifier.

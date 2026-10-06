@@ -1,6 +1,6 @@
 # Tender Document Package Builder
 
-**Live app:** https://sourav7-1.github.io/DEVfestcontest/
+**Live app:** https://de-vfestcontest.vercel.app/
 **Repository:** https://github.com/sourav7-1/DEVfestcontest
 **Generated package (official sample pack):** [`output/T-2026-0417_Package.pdf`](output/T-2026-0417_Package.pdf)
 
@@ -73,12 +73,12 @@ previews) · Source Serif 4, IBM Plex Sans/Mono, Hind Siliguri, Noto Serif Benga
 npm ci
 npm run dev                                   # http://localhost:5173
 npm test                                      # rules, matching, package builder, both packs end-to-end
-npm run build                                 # production build (served under /DEVfestcontest/)
+npm run build                                 # production build (relative asset paths: works at / and under a sub-path)
 node scripts/build-package.mjs sample-pack    # rebuild output/T-2026-0417_Package.pdf and verify it
 node scripts/verify-package.mjs output/T-2026-0417_Package.pdf sample-pack/requirements.json
 node scripts/inspect-pack.mjs sample-pack     # inspect any pack (real file type, hash, pages, text, dates)
 ```
-Pushing to `main` runs `.github/workflows/deploy.yml` (tests → build → GitHub Pages).
+Deployment: Vercel builds and publishes every push to `main` (https://de-vfestcontest.vercel.app/). `.github/workflows/deploy.yml` also runs the tests and build on each push and can publish to GitHub Pages once Pages is enabled (Settings → Pages → Source: GitHub Actions). Asset paths are relative (`base: './'` in `vite.config.ts`), so the same build works on both.
 
 ## AI usage
 AI assistance was used to build this project. The prompts used for each stage are in the [`prompts/`](prompts/) folder.

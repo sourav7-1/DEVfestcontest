@@ -77,7 +77,7 @@ describe.runIf(fs.existsSync(pack))('judge-mode test-pack', () => {
 
 describe.runIf(fs.existsSync(path.resolve('sample-pack/resolution.json')))('official sample pack', () => {
   it('resolves every requirement and builds a verified package (scripts/build-package.mjs)', () => {
-    const out = execFileSync(process.execPath, ['scripts/build-package.mjs', 'sample-pack'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    const out = execFileSync(process.execPath, ['scripts/build-package.mjs', 'sample-pack', '--out=test-pack/output'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     expect(out).toContain('10 expected statuses confirmed');
     expect(out).toContain('T-2026-0417_Package.pdf: 16 pages');
     expect(out).toContain('OK: all footers correct');

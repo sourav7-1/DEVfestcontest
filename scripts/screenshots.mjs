@@ -1,10 +1,10 @@
 // Captures the 4 submission screenshots with the official sample pack, using the locally installed Chrome.
-//   node scripts/screenshots.mjs [url]     (default: the live GitHub Pages URL)
+//   node scripts/screenshots.mjs [url]     (default: the live Vercel URL)
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const url = process.argv[2] ?? 'https://sourav7-1.github.io/DEVfestcontest/';
+const url = process.argv[2] ?? 'https://de-vfestcontest.vercel.app/';
 const docs = path.resolve('sample-pack/documents');
 const out = path.resolve('screenshots');
 fs.mkdirSync(out, { recursive: true });
