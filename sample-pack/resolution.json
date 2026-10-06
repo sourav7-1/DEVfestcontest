@@ -1,0 +1,14 @@
+{
+  "R01": { "file": "trade_license_2026.pdf", "expiry": "2027-06-30" },
+  "R02": { "file": "03_tin_certificate.pdf" },
+  "R03": { "file": "04_vat_certificate.pdf" },
+  "R04": { "file": "bank_solvency.pdf", "expiry": "2026-12-31" },
+  "R05": { "file": "experience_cert.pdf" },
+  "R08": { "file": "02_technical_proposal.pdf" },
+  "R09": { "file": "01_financial_proposal.pdf" },
+  "R10": { "file": "scan_0042.pdf" },
+  "expect": {
+    "R01": "ok", "R02": "ok", "R03": "ok", "R04": "ok", "R05": "ok",
+    "R06": "not_provided", "R07": "not_provided", "R08": "ok", "R09": "ok", "R10": "ok"
+  }
+}

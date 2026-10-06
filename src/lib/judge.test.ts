@@ -9,6 +9,7 @@ import { readUpload, type PageCounter } from './files';
 import { assign, type MatchState } from './matching';
 import { evaluate } from './status';
 import { duplicateGroups } from './duplicates';
+import type { UploadedFile } from './types';
 
 const pack = path.resolve('test-pack');
 const counter: PageCounter = async (bytes) => {
@@ -24,7 +25,7 @@ describe.runIf(fs.existsSync(pack))('judge-mode test-pack', () => {
     const { tender, requirements } = parseRequirements(fs.readFileSync(path.join(pack, 'requirements.json'), 'utf8'));
     expect(tender.tender_id).toBe('LGED-CTG-2026-1189');
     expect(requirements.map((r) => r.order)).toEqual([10, 20, 25, 30, 40, 50, 60]); // unsorted in file
-    const files = [];
+    const files: UploadedFile[] = [];
     for (const name of fs.readdirSync(path.join(pack, 'documents'))) {
       const b = new Uint8Array(fs.readFileSync(path.join(pack, 'documents', name)));
       files.push(await readUpload({ name, size: b.length, arrayBuffer: async () => b.slice().buffer }, counter));
@@ -68,8 +69,17 @@ describe.runIf(fs.existsSync(pack))('judge-mode test-pack', () => {
   });
 
   it('builds and verifies the package end-to-end (scripts/build-package.mjs)', () => {
-    const out = execFileSync(process.execPath, ['scripts/build-package.mjs', 'test-pack'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    const out = execFileSync(process.execPath, ['scripts/build-package.mjs', 'test-pack', '--out=test-pack/output'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     expect(out).toContain('7 expected statuses confirmed');
+    expect(out).toContain('OK: all footers correct');
+  });
+});
+
+describe.runIf(fs.existsSync(path.resolve('sample-pack/resolution.json')))('official sample pack', () => {
+  it('resolves every requirement and builds a verified package (scripts/build-package.mjs)', () => {
+    const out = execFileSync(process.execPath, ['scripts/build-package.mjs', 'sample-pack'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    expect(out).toContain('10 expected statuses confirmed');
+    expect(out).toContain('T-2026-0417_Package.pdf: 16 pages');
     expect(out).toContain('OK: all footers correct');
   });
 });

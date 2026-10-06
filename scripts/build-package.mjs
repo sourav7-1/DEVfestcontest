@@ -1,5 +1,5 @@
 // Builds a pack's package with the SAME logic as the app (src/lib), from a documented resolution file.
-//   node scripts/build-package.mjs <packDir> [resolution.json]      (default: <packDir>/resolution.json)
+//   node scripts/build-package.mjs <packDir> [resolution.json] [--out=dir]   (defaults: <packDir>/resolution.json, output/)
 // resolution.json: { "<reqId>": { "file": "x.pdf", "expiry": "YYYY-MM-DD", "exclude": "reason" }, "expect": { "<reqId>": "<status>" } }
 // - every expiry must appear in the document's own text (no invented dates)
 // - "expect" asserts the statuses BEFORE exclusions (judge-mode checks)
@@ -16,12 +16,14 @@ import { evaluate } from '../src/lib/status.ts';
 import { duplicateGroups } from '../src/lib/duplicates.ts';
 import { buildPackage, packageFileName } from '../src/lib/package.ts';
 
-const pack = process.argv[2];
+const args = process.argv.slice(2).filter((a) => !a.startsWith('--out='));
+const outDir = process.argv.find((a) => a.startsWith('--out='))?.slice(6) ?? 'output';
+const pack = args[0];
 if (!pack) {
   console.error('usage: node scripts/build-package.mjs <packDir> [resolution.json]');
   process.exit(2);
 }
-const resolution = JSON.parse(fs.readFileSync(process.argv[3] ?? path.join(pack, 'resolution.json'), 'utf8'));
+const resolution = JSON.parse(fs.readFileSync(args[1] ?? path.join(pack, 'resolution.json'), 'utf8'));
 const { tender, requirements } = parseRequirements(fs.readFileSync(path.join(pack, 'requirements.json'), 'utf8'));
 const today = new Date();
 const generatedOn = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -130,8 +132,8 @@ const items = requirements
   .filter((r) => state.matches[r.id])
   .map((r) => ({ req: r, file: { name: files.find((f) => f.id === state.matches[r.id]).name, bytes: files.find((f) => f.id === state.matches[r.id]).bytes } }));
 const out = await buildPackage({ tender, items, generatedOn });
-fs.mkdirSync('output', { recursive: true });
-const outPath = path.join('output', packageFileName(tender.tender_id));
+fs.mkdirSync(outDir, { recursive: true });
+const outPath = path.join(outDir, packageFileName(tender.tender_id));
 fs.writeFileSync(outPath, out.bytes);
 console.log(`\nBuilt ${outPath}: ${out.totalPages} pages (${out.coverPages} cover + ${out.docs.map((d) => `${d.order}:${d.pages}p`).join(', ')})`);
 execFileSync(process.execPath, ['scripts/verify-package.mjs', outPath, path.join(pack, 'requirements.json')], { stdio: 'inherit' });

@@ -115,7 +115,7 @@ describe('duplicates', () => {
   });
 });
 
-// Real-pack regression: the planted traps must be detected end-to-end with the same pdfjs the app uses.
+// Official sample pack regression: its traps must be detected end-to-end with the same pdfjs the app uses.
 const pack = path.resolve('sample-pack/documents');
 describe.runIf(fs.existsSync(pack))('sample pack', () => {
   const nodeCounter: PageCounter = async (bytes) => {
@@ -134,13 +134,19 @@ describe.runIf(fs.existsSync(pack))('sample pack', () => {
       out[name] = u.error ?? u.pageCount;
       files.push(u);
     }
-    expect(out).toMatchObject({
-      'bid_security_BG.pdf': 'not_pdf',
-      'power_of_attorney.pdf': 'corrupt',
-      'ISO_9001_certificate.pdf': 'encrypted',
-      'audited_financials_FY23-FY25.pdf': 3,
-      '01_trade_license.pdf': 1,
+    expect(out).toEqual({
+      'company_logo.png': 'not_pdf',
+      'scan_0042.pdf': 1, // image-only scan (the signed declaration)
+      '01_financial_proposal.pdf': 2,
+      '02_technical_proposal.pdf': 6,
+      '03_tin_certificate.pdf': 1,
+      '04_vat_certificate.pdf': 1,
+      'bank_solvency.pdf': 1,
+      'experience_cert.pdf': 2,
+      'experience_cert (1).pdf': 2,
+      'trade_license_2025.pdf': 1,
+      'trade_license_2026.pdf': 1,
     });
-    expect(duplicateGroups(files).map((g) => g.map((x) => x.name).sort())).toEqual([['experience_certificate.pdf', 'scan_0042.pdf']]);
+    expect(duplicateGroups(files).map((g) => g.map((x) => x.name).sort())).toEqual([['experience_cert (1).pdf', 'experience_cert.pdf']]);
   });
 });

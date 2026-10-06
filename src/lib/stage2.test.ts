@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
 import { PDFDocument, StandardFonts, degrees } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { evaluate, requirementStatus } from './status';
@@ -198,19 +196,5 @@ describe('package builder', () => {
   it('names the file after the tender', () => {
     expect(packageFileName('PWD-DHK-2026-0417')).toBe('PWD-DHK-2026-0417_Package.pdf');
     expect(packageFileName('A/B C')).toBe('A_B_C_Package.pdf');
-  });
-
-  const pack = path.resolve('sample-pack/documents');
-  it.runIf(fs.existsSync(pack))('builds from the sample pack', async () => {
-    const rd = (n: string) => new Uint8Array(fs.readFileSync(path.join(pack, n)));
-    const res = await buildPackage({
-      tender: { ...tender, tender_id: 'PWD-DHK-2026-0417' },
-      generatedOn: '2026-10-06',
-      items: [
-        { req: { id: 'trade', order: 1, title_en: 'Trade License' }, file: { name: '01_trade_license.pdf', bytes: rd('01_trade_license.pdf') } },
-        { req: { id: 'fin', order: 7, title_en: 'Audited' }, file: { name: 'a.pdf', bytes: rd('audited_financials_FY23-FY25.pdf') } },
-      ],
-    });
-    expect(res.totalPages).toBe(5);
   });
 });
