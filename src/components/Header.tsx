@@ -1,7 +1,7 @@
 import { Check, FileStack, ShieldCheck } from 'lucide-react';
 import type { Lang } from '@/lib/types';
 import { translate } from '@/i18n';
-import { useStore, useT } from '@/store';
+import { useEvaluation, useStore, useT } from '@/store';
 import { toast } from 'sonner';
 import { Badge, cn } from './ui';
 
@@ -51,7 +51,8 @@ export function TopBar() {
 export function Stepper() {
   const t = useT();
   const { step, setStep, tender, files } = useStore();
-  const done = [!!tender, files.some((f) => !f.error), false, false];
+  const { canGenerate } = useEvaluation();
+  const done = [!!tender, files.some((f) => !f.error), canGenerate, false];
   return (
     <nav aria-label={t('step.nav')} className="mx-auto max-w-7xl px-6 pt-6">
       <ol className="flex items-center gap-2">

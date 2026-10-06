@@ -1,20 +1,31 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
-import { Info, PackageCheck } from 'lucide-react';
-import { duplicateGroups } from '@/lib/duplicates';
-import { useStore, useT } from '@/store';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
+import { FileText, Info } from 'lucide-react';
+import { useEvaluation, useStore, useT } from '@/store';
+import { requestMatch } from '@/actions';
 import { TopBar, Stepper } from '@/components/Header';
-import { RequirementsHero, RequirementsList, TenderSummary } from '@/components/Requirements';
+import { RequirementsHero, TenderSummary } from '@/components/Requirements';
+import { Checklist } from '@/components/Checklist';
 import { FilesTray } from '@/components/FilesTray';
-import { Alert, Button, TooltipProvider, Tooltip } from '@/components/ui';
-import { STATUS_META } from '@/components/status';
-import { Status } from '@/lib/types';
+import { GenerateBar } from '@/components/GenerateBar';
+import { PreviewSheet, ReplaceDialog } from '@/components/Dialogs';
+import { Alert, TooltipProvider } from '@/components/ui';
 
 function StepGuidance() {
   const t = useT();
   const { step, tender, files } = useStore();
+  const { canGenerate } = useEvaluation();
   const msg =
-    step >= 2 && !tender ? t('step.need_req') : step >= 3 && !files.some((f) => !f.error) ? t('step.need_files') : step >= 3 ? t('step.coming') : null;
+    step >= 2 && !tender
+      ? t('step.need_req')
+      : step >= 3 && !files.some((f) => !f.error)
+        ? t('step.need_files')
+        : step === 3
+          ? t('step.match_hint')
+          : step === 4
+            ? t(canGenerate ? 'step.gen_ready' : 'step.need_fix')
+            : null;
   if (!msg) return null;
   return (
     <Alert tone="info" className="mb-6">
@@ -24,36 +35,32 @@ function StepGuidance() {
   );
 }
 
-function BottomBar() {
-  const t = useT();
-  const { requirements, files } = useStore();
-  const problems = files.filter((f) => f.error).length + duplicateGroups(files).length;
-  const ready = 0; // ponytail: real readiness comes with matching/status selectors in stage 2
-  const Warn = STATUS_META[Status.Error].icon;
-  const Ok = STATUS_META[Status.OK].icon;
+function Workspace() {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const [dragId, setDragId] = useState<string | null>(null);
+  const dragFile = useStore((s) => s.files.find((f) => f.id === dragId));
+  const onStart = (e: DragStartEvent) => setDragId((e.active.data.current?.fileId as string) ?? null);
+  const onEnd = (e: DragEndEvent) => {
+    setDragId(null);
+    const fileId = e.active.data.current?.fileId as string | undefined;
+    const reqId = e.over?.data.current?.reqId as string | undefined;
+    if (fileId && reqId) requestMatch(reqId, fileId);
+  };
   return (
-    <div className="sticky bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-6 px-6 py-3">
-        <div className="min-w-48 flex-1">
-          <p className="font-medium text-ink">{t('bar.progress', { done: ready, total: requirements.length })}</p>
-          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuemin={0} aria-valuemax={requirements.length} aria-valuenow={ready}>
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${requirements.length ? (ready / requirements.length) * 100 : 0}%` }} />
-          </div>
-        </div>
-        <p className={problems ? 'flex items-center gap-2 font-medium text-red-700' : 'flex items-center gap-2 text-emerald-700'}>
-          {problems ? <Warn className="h-5 w-5" aria-hidden /> : <Ok className="h-5 w-5" aria-hidden />}
-          {problems === 0 ? t('bar.no_problems') : problems === 1 ? t('bar.problem') : t('bar.problems', { n: problems })}
-        </p>
-        <Tooltip content={t('bar.generate_hint')}>
-          <span tabIndex={0}>
-            <Button size="lg" disabled>
-              <PackageCheck className="h-5 w-5" aria-hidden />
-              {t('bar.generate')}
-            </Button>
-          </span>
-        </Tooltip>
+    <DndContext sensors={sensors} onDragStart={onStart} onDragEnd={onEnd} onDragCancel={() => setDragId(null)}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <Checklist />
+        <FilesTray />
       </div>
-    </div>
+      <DragOverlay dropAnimation={null}>
+        {dragFile && (
+          <div className="flex max-w-xs items-center gap-2 rounded-lg border border-primary bg-white px-3 py-2 shadow-lg">
+            <FileText className="h-5 w-5 shrink-0 text-red-600" aria-hidden />
+            <span className="truncate font-medium text-ink">{dragFile.name}</span>
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
   );
 }
 
@@ -77,15 +84,14 @@ export default function App() {
           ) : (
             <div className="space-y-6">
               <TenderSummary />
-              <div className="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
-                <RequirementsList />
-                <FilesTray />
-              </div>
+              <Workspace />
             </div>
           )}
         </main>
-        {tender && <BottomBar />}
+        {tender && <GenerateBar />}
       </div>
+      <PreviewSheet />
+      <ReplaceDialog />
       <Toaster position="top-right" offset={80} richColors closeButton toastOptions={{ className: 'text-base' }} />
     </TooltipProvider>
   );

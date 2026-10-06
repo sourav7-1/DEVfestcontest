@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
-import { AlertTriangle, CalendarCheck, CalendarDays, FileJson, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CalendarDays, FileJson, RefreshCw } from 'lucide-react';
 import { parseRequirements, RequirementsError, daysUntil, todayISO } from '@/lib/requirements';
 import { localizeDigits, translate, type Key } from '@/i18n';
 import { useStore, useT } from '@/store';
-import { Alert, Badge, Button, Card, cn } from './ui';
+import { Alert, Button, Card, cn } from './ui';
 
 /** Reads + validates a requirements file; returns an error message or loads it into the store. */
 function useRequirementsLoader() {
@@ -155,44 +155,6 @@ export function TenderSummary() {
         <RefreshCw className="h-4 w-4" aria-hidden />
         {t('tender.replace')}
       </Button>
-    </Card>
-  );
-}
-
-export function RequirementsList() {
-  const t = useT();
-  const { requirements, lang } = useStore();
-  return (
-    <Card>
-      <div className="flex items-baseline justify-between gap-3 border-b border-line px-6 py-4">
-        <h2 className="text-lg font-semibold text-ink">{t('req.heading')}</h2>
-        <span className="text-sm text-slate-500">{t('req.count', { n: requirements.length })}</span>
-      </div>
-      <ol>
-        {requirements.map((r) => (
-          <li key={r.id} className="flex items-center gap-4 border-b border-line px-6 py-4 last:border-b-0">
-            <span
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-base font-semibold tabular-nums text-primary-dark"
-              aria-label={t('req.order', { n: r.order })}
-            >
-              {localizeDigits(String(r.order), lang)}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-medium text-ink">{lang === 'bn' ? r.title_bn : r.title_en}</p>
-              <p className="truncate text-sm text-slate-500">{lang === 'bn' ? r.title_en : r.title_bn}</p>
-            </div>
-            <div className="flex shrink-0 flex-wrap justify-end gap-2">
-              {r.expiry_required && (
-                <Badge tone="neutral">
-                  <CalendarCheck className="h-4 w-4" aria-hidden />
-                  {t('req.expiry')}
-                </Badge>
-              )}
-              <Badge tone={r.mandatory ? 'primary' : 'gray'}>{r.mandatory ? t('req.mandatory') : t('req.optional')}</Badge>
-            </div>
-          </li>
-        ))}
-      </ol>
     </Card>
   );
 }
